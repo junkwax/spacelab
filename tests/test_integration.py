@@ -4,7 +4,7 @@ from src.simulation import run_simulation
 
 def test_simulation_workflow(tmp_path):
     """Integration test for the full simulation workflow."""
-
+        
     # Create test config
     config = {
         "black_hole": {
@@ -13,14 +13,19 @@ def test_simulation_workflow(tmp_path):
         },
         "dark_matter": {
             "mass": 1e-22,  # eV
-            "coupling_dilaton": 1e-10,  # Update to use coupling_dilaton
-            "coupling_curvature": 1e-5  # Add coupling_curvature
+            "coupling_dilaton": 1e-10, 
+            "coupling_curvature": 1e-5  
+        },
+        "dark_energy": {  # Add the dark_energy section
+            "V0": 1e-47,  # Example value for V0
+            "lambda_": 0.1  # Example value for lambda_
         },
         "numerical": {
             "grid_size": 128,
             "time_steps": 500
         }
     }
+
     
     # Write config to temporary file
     config_file = tmp_path / "test_config.yaml"
