@@ -10,33 +10,32 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # You can also use `ubuntu-22.04` or other available options.
+    runs-on: ubuntu-latest
 
     steps:
-    # Checkout code
     - name: Checkout code
       uses: actions/checkout@v2
 
-    # Set up Python environment
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.8'
 
-    # Install MPI development packages
     - name: Install MPI development packages
       run: |
         sudo apt update
-        sudo apt install -y libmpich-dev  # For MPICH; use libopenmpi-dev for Open MPI
+        sudo apt install -y libmpich-dev  # Use this for MPICH
 
-    # Create virtual environment and install dependencies
+    - name: Install BLAS and LAPACK libraries
+      run: |
+        sudo apt install -y libblas-dev liblapack-dev
+
     - name: Install dependencies
       run: |
         python -m venv venv
         source venv/bin/activate
         pip install -r requirements.txt
 
-    # Run tests (optional)
     - name: Run tests
       run: |
         source venv/bin/activate
