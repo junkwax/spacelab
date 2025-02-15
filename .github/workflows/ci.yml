@@ -25,22 +25,18 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y libmpich-dev libblas-dev liblapack-dev libopenmpi-dev
-        sudo apt install -y software-properties-common
-        sudo add-apt-repository ppa:petsc/petsc-dev
-        sudo apt update
-        sudo apt install -y libpetsc-dev
 
     - name: Install build dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install cython  # Ensure Cython is installed before anything else
+        pip install cython petsc4py  # Install PETSc bindings for Python
+        pip install pytest  # Ensure pytest is installed
 
     - name: Create virtual environment and install dependencies
       run: |
         python -m venv venv
         source venv/bin/activate
         pip install -r requirements.txt
-        pip install pytest  # Ensure pytest is installed
 
     - name: Set environment variables
       run: |
