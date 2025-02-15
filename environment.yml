@@ -1,0 +1,13 @@
+name: spacelab
+channels:
+  - defaults
+dependencies:
+  - python=3.8
+  - numpy
+  - scipy
+  - emcee
+  - h5py
+  - matplotlib
+  - pyyaml
+  - mpi4py
+  - petsc4py
