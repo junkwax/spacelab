@@ -1,0 +1,14 @@
+# Black hole simulation parameters
+black_hole:
+  mass: 1e6  # Solar masses
+  spin: 0.7  # Dimensionless spin parameter
+
+# Dark matter parameters
+dark_matter:
+  mass: 1e-22  # eV
+  coupling: 1e-10  # Dimensionless coupling constant
+
+# Numerical parameters
+numerical:
+  grid_size: 256  # Grid resolution
+  time_steps: 1000  # Number of time steps
