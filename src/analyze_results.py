@@ -5,7 +5,7 @@ def analyze_fit_results(input_file, plot_dir):
     """Analyze MCMC fit results."""
     with h5py.File(input_file, 'r') as f:
         samples = f['samples'][()]
-    
+        
     plt.figure()
     plt.hist(samples[:, :, 0].flatten(), bins=50, label='Mass')
     plt.hist(samples[:, :, 1].flatten(), bins=50, label='Coupling')
