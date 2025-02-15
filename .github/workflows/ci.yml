@@ -1,20 +1,10 @@
-name: Run Tests & Linter
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
 jobs:
   test:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-
+    
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -26,11 +16,12 @@ jobs:
 
       - name: Install platform-specific dependencies
         run: |
-          if [[ $RUNNER_OS == 'Linux' ]]; then
+          if [ $RUNNER_OS == 'Linux' ]; then
             sudo apt-get update
             sudo apt-get install -y libblas-dev liblapack-dev
+          elif [ $RUNNER_OS == 'Windows' ]; then
+            echo "No dependencies required for Windows"
           fi
-        shell: bash
 
       - name: Install dependencies
         run: |
