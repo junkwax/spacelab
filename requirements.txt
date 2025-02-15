@@ -1,0 +1,8 @@
+numpy
+scipy
+emcee
+h5py
+matplotlib
+pyyaml
+mpi4py
+petsc4py
