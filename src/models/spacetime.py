@@ -14,7 +14,7 @@ class SpacetimeGeometry:
         self.G = 6.67430e-11  # Gravitational constant [m^3 kg^-1 s^-2]
         self.c = 299792458  # Speed of light [m/s]
 
-    def schwarzschild_metric(
+ def schwarzschild_metric(
         self,
         r: Union[float, np.ndarray]
     ) -> Union[Tuple[float, float, float, float], Tuple[np.ndarray,...]]:
