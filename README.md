@@ -1,4 +1,4 @@
-# Dark Matter and Black Holes in Higher Dimensions
+# spacelab - Dark Matter and Black Holes in Higher Dimensions
 
 This repository explores a theoretical framework to understand the relationship between **dark matter**, **black holes**, and **higher-dimensional spacetime**. By incorporating:
 
