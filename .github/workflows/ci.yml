@@ -21,22 +21,20 @@ jobs:
       with:
         python-version: '3.8'
 
-    - name: Install MPI development packages
+    - name: Install system dependencies
       run: |
         sudo apt update
-        sudo apt install -y libmpich-dev  # Use this for MPICH
+        sudo apt install -y libmpich-dev libblas-dev liblapack-dev
 
-    - name: Install BLAS and LAPACK libraries
-      run: |
-        sudo apt install -y libblas-dev liblapack-dev
-
-    - name: Install dependencies
+    - name: Create virtual environment and install dependencies
       run: |
         python -m venv venv
         source venv/bin/activate
+        pip install --upgrade pip
         pip install -r requirements.txt
+        pip install pytest  # Ensure pytest is installed
 
     - name: Run tests
       run: |
         source venv/bin/activate
-        pytest
+        pytest tests/
