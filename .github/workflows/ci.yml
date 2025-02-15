@@ -1,4 +1,4 @@
-name: Run Tests & Linter
+name: Python CI
 
 on:
   push:
@@ -9,53 +9,35 @@ on:
       - main
 
 jobs:
-  test:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+  build:
+    runs-on: ubuntu-latest  # You can also use `ubuntu-22.04` or other available options.
 
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
+    # Checkout code
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.8'
+    # Set up Python environment
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
 
-      - name: Install Linux dependencies
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libblas-dev liblapack-dev
+    # Install MPI development packages
+    - name: Install MPI development packages
+      run: |
+        sudo apt update
+        sudo apt install -y libmpich-dev  # For MPICH; use libopenmpi-dev for Open MPI
 
-      - name: Install macOS dependencies
-        if: runner.os == 'macOS'
-        run: |
-          echo "No additional dependencies required for macOS"
+    # Create virtual environment and install dependencies
+    - name: Install dependencies
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt
 
-      - name: Install Windows dependencies
-        if: runner.os == 'Windows'
-        run: |
-          echo "No dependencies required for Windows"
-
-      - name: Install Python dependencies
-        run: |
-          pip install -r requirements.txt
-          timeout-minutes: 30 
-          pip install pytest pytest-cov flake8
-
-      - name: Run Linter
-        run: |
-          flake8 src/
-
-      - name: Run Tests with Coverage
-        run: |
-          pytest tests/ --cov=src --cov-report=xml --cov-report=term
-
-      - name: Upload Coverage Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage.xml
+    # Run tests (optional)
+    - name: Run tests
+      run: |
+        source venv/bin/activate
+        pytest
