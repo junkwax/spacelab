@@ -1,20 +1,16 @@
-# Use an official Python runtime as a parent image
-FROM python:3.8-slim
+# Build stage
+FROM python:3.10-slim as builder
 
-# Set the working directory
 WORKDIR /app
-
-# Copy the requirements file
 COPY requirements.txt .
+RUN pip install --user -r requirements.txt
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Runtime stage
+FROM python:3.10-slim
 
-# Copy the rest of the application code
+WORKDIR /app
+COPY --from=builder /root/.local /root/.local
 COPY . .
 
-# Set environment variables
-ENV PYTHONPATH=/app
-
-# Run the simulation script by default
+ENV PATH=/root/.local/bin:$PATH
 CMD ["python", "src/black_hole_simulation.py", "--config", "configs/simulation_config.yaml"]
