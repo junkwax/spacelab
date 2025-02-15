@@ -71,4 +71,5 @@ class DarkMatter:
         phi, dphi_dr = y
         # TODO: Calculate second derivative, including bulk terms (Implement bulk terms)
         ddphi_dr2 = -2.0 / r * dphi_dr - self.potential(phi, r, dilaton_field)  # Placeholder, needs bulk terms and metric function
-        return [dphi_dr, ddphi_dr2]
+        # Ensure ddphi_dr2 is a NumPy array with a single element
+        return [dphi_dr, np.array([ddphi_dr2])]
