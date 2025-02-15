@@ -31,6 +31,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install cython petsc4py  # Install PETSc bindings for Python
         pip install pytest  # Ensure pytest is installed
+        pip install PyYAML
 
     - name: Create virtual environment and install dependencies
       run: |
@@ -40,7 +41,7 @@ jobs:
 
     - name: Set environment variables
       run: |
-        echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
+        echo "PYTHONPATH=src" >> $GITHUB_ENV
         echo "PETSC_DIR=/usr/lib/petsc" >> $GITHUB_ENV  # Set PETSc location
 
     - name: Run tests
