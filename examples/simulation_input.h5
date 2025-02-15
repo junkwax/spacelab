@@ -1,0 +1,7 @@
+import h5py
+import numpy as np
+
+# Create example input data
+with h5py.File('examples/simulation_input.h5', 'w') as f:
+    f.create_dataset('radius', data=np.linspace(0.1, 100, 256))
+    f.create_dataset('initial_density', data=np.random.rand(256))
