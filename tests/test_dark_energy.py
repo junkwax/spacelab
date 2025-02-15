@@ -1,16 +1,19 @@
-import unittest
+# tests/test_dark_energy.py
+import pytest
 import numpy as np
-from src.models.dark_energy import DarkEnergy
+from src.models.dark_energy import QuintessenceField
 
-class TestDarkEnergy(unittest.TestCase):
-    def test_potential(self):
-        de = DarkEnergy(V0=1e-10, lambda_=0.1)
-        self.assertAlmostEqual(de.potential(0), 1e-10)
+def test_quintessence_potential():
+    q = QuintessenceField(V0=1e-10, lambda_=0.1)
+    assert np.isclose(q.potential(0), 1e-10)
 
-    def test_equation_of_state(self):
-        de = DarkEnergy(V0=1e-10, lambda_=0.1)
-        w = de.equation_of_state(phi=0, dphi_dt=0)
-        self.assertAlmostEqual(w, -1.0)  # Cosmological constant
+def test_invalid_parameters():
+    with pytest.raises(ValueError):
+        QuintessenceField(V0=-1, lambda_=0.1)
+    with pytest.raises(ValueError):
+        QuintessenceField(V0=1e-10, lambda_=-0.1)
 
-if __name__ == "__main__":
-    unittest.main()
+def test_equation_of_state():
+    q = QuintessenceField(V0=1e-10, lambda_=0.1)
+    w = q.equation_of_state(0, 0)
+    assert np.isclose(w, -1.0)
