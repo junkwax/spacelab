@@ -32,7 +32,7 @@ The project combines theoretical models with observational data to provide insig
 ### Theoretical Framework
 - **Higher-Dimensional Metric**: Incorporates a 5D spacetime metric with a compactified extra dimension.
 - **Dark Matter Lagrangian**: Describes axion-like dark matter with couplings to the dilaton and graviphoton.
-- **Dynamical Dark Energy**: Uses a quintessence field with a potential $$ V(\phi_{\text{DE}}) $$
+- **Dynamical Dark Energy**: Uses a quintessence field with a potential \( V(\phi_{\text{DE}}) \) 
 - **Stress-Energy Tensor**: Includes bulk terms from higher dimensions.
 
 ### Numerical Implementation
