@@ -16,9 +16,12 @@ def test_simulation_workflow(tmp_path):
             "coupling_dilaton": 1e-10, 
             "coupling_curvature": 1e-5  
         },
-        "dark_energy": {  # Add the dark_energy section
+        "dark_energy": { 
             "V0": 1e-47,  # Example value for V0
             "lambda_": 0.1  # Example value for lambda_
+        },
+        "spacetime": {  # Add the spacetime section
+            "black_hole_mass": 1e6  # Example value for black hole mass
         },
         "numerical": {
             "grid_size": 128,
