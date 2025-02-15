@@ -84,7 +84,7 @@ class SpacetimeGeometry:
         self,
         r: Union[float, np.ndarray],
         dilaton_field: Union[float, np.ndarray],
-        graviphoton_field: Union[float, np.ndarray]  # Include graviphoton_field as argument
+        graviphoton_field: Union[float, np.ndarray]
     ) -> Union[float, np.ndarray]:
         """Compute Ricci scalar curvature for the Kaluza-Klein metric.
 
@@ -96,6 +96,10 @@ class SpacetimeGeometry:
         Returns:
             Ricci scalar [m^-2]
         """
+        # Convert r to a NumPy array if it's a list
+        if isinstance(r, list):
+            r = np.array(r)
+
         # Calculate metric components
         g_tt, g_rr, g_theta_theta, g_phi_phi, g_yy, g_ty = self.kaluza_klein_metric(r, dilaton_field, graviphoton_field)
 
