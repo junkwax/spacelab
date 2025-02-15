@@ -34,6 +34,9 @@ jobs:
         pip install -r requirements.txt
         pip install pytest  # Ensure pytest is installed
 
+    - name: Set PYTHONPATH
+      run: echo "PYTHONPATH=$PWD/src" >> $GITHUB_ENV
+
     - name: Run tests
       run: |
         source venv/bin/activate
