@@ -1,10 +1,10 @@
 import pytest
 import numpy as np
-from src.models.dark_matter import DarkMatter
+from src.models.dark_matter import QuintessenceField
 
 @pytest.fixture
 def dark_matter():
-    return DarkMatter(mass=1e-22, coupling=1e-10)
+    return QuintessenceField(mass=1e-22, coupling=1e-10)
 
 def test_density_profile_valid_input(dark_matter):
     r = np.array([1.0, 10.0, 100.0])
@@ -18,8 +18,8 @@ def test_density_profile_negative_radius(dark_matter):
 
 def test_invalid_mass():
     with pytest.raises(ValueError):
-        DarkMatter(mass=-1e-22, coupling=1e-10)
+        QuintessenceField(mass=-1e-22, coupling=1e-10)
 
 def test_invalid_coupling():
     with pytest.raises(ValueError):
-        DarkMatter(mass=1e-22, coupling=-1e-10)
+        QuintessenceField(mass=1e-22, coupling=-1e-10)
