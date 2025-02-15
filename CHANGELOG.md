@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.0] - 2025-02-15
+### Added
+- Error handling and input validation for all models.
+- Logging configuration and improved documentation.
+- Comprehensive unit tests for edge cases.
+
 ## [1.0.0] - 2025-02-15
 ### Added
 - Initial release of the repository.
