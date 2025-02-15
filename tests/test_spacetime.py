@@ -1,13 +1,17 @@
-# tests/test_spacetime.py
 import pytest
 import numpy as np
 from src.models.spacetime import SpacetimeGeometry
 
 def test_schwarzschild_metric():
-    spacetime = SpacetimeGeometry(mass=10)
-    g_tt, g_rr, *_ = spacetime.schwarzschild_metric(1e6)
-    assert g_tt < 0
-    assert g_rr > 0
+    spacetime = SpacetimeGeometry(mass=10)  # mass in solar masses
+    
+    # Choose a radius much larger than the Schwarzschild radius
+    r = 1e6  # radius in meters, significantly larger than Schwarzschild radius for 10 solar masses
+    
+    g_tt, g_rr, *_ = spacetime.schwarzschild_metric(r)
+    
+    assert g_tt < 0  # g_tt should be negative
+    assert g_rr > 0  # g_rr should be positive
 
 def test_ricci_curvature():
     spacetime = SpacetimeGeometry(mass=10)
