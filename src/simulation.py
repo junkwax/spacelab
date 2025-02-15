@@ -57,14 +57,12 @@ def run_simulation(config_file):
             # Placeholder for dilaton and graviphoton fields (TODO: Implement)
             dilaton_field = 1.0  
             graviphoton_field = 0.0  
-            # Calculate dark matter field equation
-            ddphi_dr2 = dm.field_equation((phi, dphi_dr), r, dilaton_field, graviphoton_field)
-            # Placeholder for dark energy field equation (TODO: Implement)
-            ddphi_de_dt2 = 0.0  
             # Ensure that the derivatives are scalars
-            ddphi_dr2 = np.asscalar(ddphi_dr2)
-            ddphi_de_dt2 = np.asscalar(ddphi_de_dt2)
-            return [dphi_dr, ddphi_dr2, dphi_de_dt, ddphi_de_dt2]
+            ddphi_dr2 = dm.field_equation((phi, dphi_dr), r, dilaton_field, graviphoton_field)
+            ddphi_de_dt2 = 0.0  # Placeholder for dark energy field equation
+
+            # Convert to scalars using item()
+            return [dphi_dr, ddphi_dr2.item(), dphi_de_dt, ddphi_de_dt2.item()]
 
         # Solve the coupled field equations
         initial_conditions = [initial_phi, initial_dphi_dr, initial_phi_de, initial_dphi_de_dt]
