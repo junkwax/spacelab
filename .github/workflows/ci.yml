@@ -22,15 +22,18 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.8'
 
-      - name: Install dependencies
+      - name: Install platform-specific dependencies
         run: |
-          # Install platform-specific dependencies
           if [[ $RUNNER_OS == 'Linux' ]]; then
             sudo apt-get update
             sudo apt-get install -y libblas-dev liblapack-dev
           fi
+        shell: bash
+
+      - name: Install dependencies
+        run: |
           pip install -r requirements.txt
           pip install pytest pytest-cov flake8
 
