@@ -24,7 +24,11 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt update
-        sudo apt install -y libmpich-dev libblas-dev liblapack-dev libopenmpi-dev libpetsc-dev
+        sudo apt install -y libmpich-dev libblas-dev liblapack-dev libopenmpi-dev
+        sudo apt install -y software-properties-common
+        sudo add-apt-repository ppa:petsc/petsc-dev
+        sudo apt update
+        sudo apt install -y libpetsc-dev
 
     - name: Install build dependencies
       run: |
