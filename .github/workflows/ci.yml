@@ -1,4 +1,4 @@
-name: Run Tests
+name: Run Tests & Linting
 
 on:
   push:
@@ -27,12 +27,24 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          pip install pytest flake8
+          pip install pytest pytest-cov flake8
 
       - name: Run Linter
         run: |
           flake8 src/
 
-      - name: Run Tests
+      - name: Run Tests with Coverage
         run: |
-          pytest tests/
+          pytest --cov=src --cov-report=xml --cov-report=term
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+      - name: Upload Test Results as GitHub Checks
+        uses: devops-infra/action-pytest-report@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          test_report: pytest-report.xml
