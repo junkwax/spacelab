@@ -97,12 +97,26 @@ To run the code, make sure you have the following dependencies installed:
    pip install -r requirements.txt
    ```
 
-3. Compile the C++ code (if applicable):
+#### Using Conda
+1. Install Miniconda or Anaconda.
+2. Create the environment:
    ```bash
-   mkdir build
-   cd build
-   cmake ..
-   make
+   conda env create -f environment.yml
+   ```
+3. Activate the environment:
+   ```bash
+   conda activate spacelab
+   ```
+
+#### Using Docker
+1. Install Docker.
+2. Build the Docker image:
+   ```bash
+   docker build -t spacelab .
+   ```
+3. Run the container:
+   ```bash
+   docker run -it spacelab
    ```
 
 ---
