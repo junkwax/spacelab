@@ -1,8 +1,18 @@
+name: Run Tests & Linter
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
 jobs:
   test:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]  # Test on Ubuntu, macOS, and Windows
+        os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     
     steps:
@@ -20,13 +30,13 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y libblas-dev liblapack-dev
           elif [ $RUNNER_OS == 'Windows' ]; then
-            echo "No platform-specific dependencies required for Windows"
+            echo "No dependencies required for Windows"
           fi
 
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          pip install pytest pytest-cov flake8  # Ensure these are needed or part of requirements.txt
+          pip install pytest pytest-cov flake8
 
       - name: Run Linter
         run: |
@@ -34,7 +44,7 @@ jobs:
 
       - name: Run Tests with Coverage
         run: |
-          pytest --cov=tests --cov-report=xml --cov-report=term  # Specify your test folder if needed
+          pytest tests/ --cov=src --cov-report=xml --cov-report=term
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
