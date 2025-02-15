@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Union, overload
 
 class DarkMatter:
     """Model for axion-like dark matter in higher-dimensional spacetime.
@@ -7,15 +8,19 @@ class DarkMatter:
         mass (float): Mass of the dark matter particle in eV.
         coupling (float): Coupling constant to the dilaton field.
     """
-    def __init__(self, mass, coupling):
-        if mass <= 0:
-            raise ValueError("Mass must be positive.")
-        if coupling <= 0:
-            raise ValueError("Coupling constant must be positive.")
+    def __init__(self, mass: float, coupling: float):
+        if mass <= 0 or coupling <= 0:
+            raise ValueError("Mass and coupling must be positive.")
         self.mass = mass
         self.coupling = coupling
 
-    def density_profile(self, r):
+    @overload
+    def density_profile(self, r: float) -> float: ...
+
+    @overload
+    def density_profile(self, r: np.ndarray) -> np.ndarray: ...
+
+    def density_profile(self, r: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
         """Compute the dark matter density profile.
         
         Args:
@@ -27,7 +32,7 @@ class DarkMatter:
         Raises:
             ValueError: If `r` is non-positive.
         """
-        r = np.asarray(r)
-        if np.any(r <= 0):
+        r_arr = np.asarray(r)
+        if np.any(r_arr <= 0):
             raise ValueError("Radius `r` must be positive.")
-        return self.coupling * np.exp(-self.mass * r) / r**2
+        return self.coupling * np.exp(-self.mass * r_arr) / r_arr**2
