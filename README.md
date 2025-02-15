@@ -49,6 +49,16 @@ The project combines theoretical models with observational data to provide insig
 
 ## Installation
 
+### Development Setup
+1. Install development dependencies:
+   ```bash
+   pip install -r requirements-dev.txt
+   ```
+2. Set up pre-commit hooks for code formatting:
+   ```bash
+   pre-commit install
+   ```
+
 ### Using Conda
 1. Install [Miniconda](https://docs.conda.io/en/latest/miniconda.html) or [Anaconda](https://www.anaconda.com/products/distribution).
 2. Create the environment:
