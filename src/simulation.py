@@ -1,7 +1,7 @@
 import yaml
 import logging
 from src.models.dark_matter import DarkMatter
-from src.models.dark_energy import DarkEnergy
+from src.models.dark_energy import QuintessenceField
 from src.utils.data_loader import load_h5_data
 from src.utils.plotting import plot_rotation_curve
 
