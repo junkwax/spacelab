@@ -1,5 +1,6 @@
 # tests/test_spacetime.py
 import pytest
+import numpy as np
 from src.models.spacetime import SpacetimeGeometry
 
 def test_schwarzschild_metric():
