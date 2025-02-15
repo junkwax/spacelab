@@ -14,7 +14,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -24,16 +24,23 @@ jobs:
         with:
           python-version: '3.8'
 
-      - name: Install platform-specific dependencies
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
         run: |
-          if [ $RUNNER_OS == 'Linux' ]; then
-            sudo apt-get update
-            sudo apt-get install -y libblas-dev liblapack-dev
-          elif [ $RUNNER_OS == 'Windows' ]; then
-            echo "No dependencies required for Windows"
-          fi
+          sudo apt-get update
+          sudo apt-get install -y libblas-dev liblapack-dev
 
-      - name: Install dependencies
+      - name: Install macOS dependencies
+        if: runner.os == 'macOS'
+        run: |
+          echo "No additional dependencies required for macOS"
+
+      - name: Install Windows dependencies
+        if: runner.os == 'Windows'
+        run: |
+          echo "No dependencies required for Windows"
+
+      - name: Install Python dependencies
         run: |
           pip install -r requirements.txt
           pip install pytest pytest-cov flake8
