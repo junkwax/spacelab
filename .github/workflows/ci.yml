@@ -32,6 +32,7 @@ jobs:
         pip install cython petsc4py  # Install PETSc bindings for Python
         pip install pytest  # Ensure pytest is installed
         pip install PyYAML
+        pip install h5py  # Install h5py to handle HDF5 files
 
     - name: Create virtual environment and install dependencies
       run: |

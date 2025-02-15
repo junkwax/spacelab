@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 class QuintessenceField:
     """Model for dynamical dark energy (quintessence) with a scalar field.
-    
+
     Args:
         V0 (float): Energy scale of the potential [eV^4].
         lambda_ (float): Slope parameter of the exponential potential.
@@ -20,10 +20,10 @@ class QuintessenceField:
 
     def potential(self, phi: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
         """Compute the quintessence potential V(φ).
-        
+
         Args:
             phi (float or np.ndarray): Scalar field value [eV]
-        
+
         Returns:
             Potential energy [eV^4]
         """
@@ -35,20 +35,29 @@ class QuintessenceField:
         dphi_dt: Union[float, np.ndarray]
     ) -> Union[float, np.ndarray]:
         """Compute the equation of state parameter w = P/ρ.
-        
+
         Args:
             phi: Scalar field value [eV]
             dphi_dt: Time derivative of phi [eV^2]
-        
+
         Returns:
             Equation of state parameter (dimensionless)
         """
         kinetic = 0.5 * dphi_dt**2
         potential = self.potential(phi)
         denominator = kinetic + potential
-        
+
         if np.any(denominator == 0):
             logger.warning("Division by zero in equation_of_state calculation")
             return np.full_like(denominator, -1.0)  # Return w=-1 for stability
-        
+
         return (kinetic - potential) / denominator
+
+    def field_equation(self, y, t, dark_matter_field, metric_function):
+        """Quintessence field equation."""
+        phi, dphi_dt = y
+        # Calculate Hubble parameter based on the metric
+        H =...  # TODO: Implement Hubble parameter calculation
+        # Calculate second derivative, including coupling to dark matter (if any)
+        ddphi_dt2 = -3 * H * dphi_dt - self.potential(phi)  # Placeholder, needs coupling term and metric function
+        return [dphi_dt, ddphi_dt2]
