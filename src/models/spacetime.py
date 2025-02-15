@@ -27,7 +27,7 @@ class SpacetimeGeometry:
             Tuple containing (g_tt, g_rr, g_theta_theta, g_phi_phi)
         """
         # Convert mass from solar masses to kilograms
-        mass_kg = self.mass * 1.98847e30  # Use the correct conversion factor
+        mass_kg = self.mass * 1.98847e30  # 1 solar mass = 1.988e30 kg
 
         # Calculate Schwarzschild radius in meters
         rs = 2 * self.G * mass_kg / (self.c**2)
