@@ -42,9 +42,3 @@ jobs:
         with:
           name: coverage-report
           path: coverage.xml
-
-      - name: Upload Test Results as GitHub Checks
-        uses: devops-infra/action-pytest-report@v2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          test_report: pytest-report.xml
