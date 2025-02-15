@@ -62,7 +62,7 @@ def run_simulation(config_file):
             # Placeholder for dark energy field equation (TODO: Implement)
             ddphi_de_dt2 = 0.0  
             # Ensure that the derivatives are scalars
-            return [dphi_dr, ddphi_dr2.item(), dphi_de_dt, ddphi_de_dt2]
+            return [dphi_dr, ddphi_dr2.item(), dphi_de_dt, ddphi_de_dt2]  # Extract scalar value from ddphi_dr2
 
         # Solve the coupled field equations
         initial_conditions = [initial_phi, initial_dphi_dr, initial_phi_de, initial_dphi_de_dt]
