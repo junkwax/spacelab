@@ -1,16 +1,17 @@
-import unittest
-import numpy as np
-from src.models.spacetime import Spacetime, schwarzschild_metric, ricci_curvature
+# tests/test_spacetime.py
+import pytest
+from src.models.spacetime import SpacetimeGeometry
 
-class TestSpacetime(unittest.TestCase):
-    def test_metric(self):
-        r = 10.0
-        metric = schwarzschild_metric(r)
-        self.assertEqual(metric.shape, (4, 4))
+def test_schwarzschild_metric():
+    spacetime = SpacetimeGeometry(mass=10)
+    g_tt, g_rr, *_ = spacetime.schwarzschild_metric(1e6)
+    assert g_tt < 0
+    assert g_rr > 0
 
-    def test_curvature(self):
-        r = 10.0
-        self.assertEqual(ricci_curvature(r), 0)
+def test_ricci_curvature():
+    spacetime = SpacetimeGeometry(mass=10)
+    assert np.all(spacetime.ricci_curvature([1e6, 1e7]) == 0)
 
-if __name__ == "__main__":
-    unittest.main()
+def test_invalid_mass():
+    with pytest.raises(ValueError):
+        SpacetimeGeometry(mass=-10)
