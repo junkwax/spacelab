@@ -1,23 +1,54 @@
 import numpy as np
+from typing import Union, Tuple
+import logging
 
-class Spacetime:
-    def __init__(self, metric_func, curvature_func):
-        self.metric_func = metric_func
-        self.curvature_func = curvature_func
+logger = logging.getLogger(__name__)
 
-    def metric(self, r):
-        """Compute the spacetime metric tensor at radius r."""
-        return self.metric_func(r)
+class SpacetimeGeometry:
+    """General relativistic spacetime geometry toolkit.
+    
+    Args:
+        mass (float): Black hole mass [solar masses]
+    """
+    def __init__(self, mass: float):
+        if mass <= 0:
+            logger.error("Invalid black hole mass: %s", mass)
+            raise ValueError("Mass must be positive.")
+        self.mass = mass
+        self.G = 6.67430e-11  # Gravitational constant [m^3 kg^-1 s^-2]
+        self.c = 299792458  # Speed of light [m/s]
 
-    def curvature(self, r):
-        """Compute the Ricci scalar curvature at radius r."""
-        return self.curvature_func(r)
+    def schwarzschild_metric(
+        self,
+        r: Union[float, np.ndarray]
+    ) -> Union[Tuple[float, float, float, float], Tuple[np.ndarray, ...]]:
+        """Compute Schwarzschild metric components in spherical coordinates.
+        
+        Args:
+            r: Radial coordinate [meters]
+        
+        Returns:
+            Tuple containing (g_tt, g_rr, g_θθ, g_φφ)
+        """
+        rs = 2 * self.G * self.mass * 1.988e30 / (self.c**2)  # Schwarzschild radius
+        g_tt = -(1 - rs / r)
+        g_rr = 1 / g_tt
+        g_theta_theta = r**2
+        g_phi_phi = r**2 * np.sin(np.pi/2)**2  # Assume equatorial plane
+        
+        return (g_tt, g_rr, g_theta_theta, g_phi_phi)
 
-# Example metric and curvature functions
-def schwarzschild_metric(r, M=1e6):
-    """Schwarzschild metric in spherical coordinates."""
-    return np.diag([-(1 - 2*M/r), 1/(1 - 2*M/r), r**2, r**2*np.sin(np.pi/2)**2])
-
-def ricci_curvature(r, M=1e6):
-    """Ricci scalar curvature for Schwarzschild spacetime."""
-    return 0  # Schwarzschild is Ricci-flat
+    def ricci_curvature(
+        self,
+        r: Union[float, np.ndarray]
+    ) -> Union[float, np.ndarray]:
+        """Compute Ricci scalar curvature for Schwarzschild spacetime.
+        
+        Args:
+            r: Radial coordinate [meters]
+        
+        Returns:
+            Ricci scalar [m^-2]
+        """
+        # Schwarzschild spacetime is Ricci-flat (R=0)
+        return np.zeros_like(r)
