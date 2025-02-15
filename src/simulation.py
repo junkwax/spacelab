@@ -3,8 +3,8 @@ import logging
 from src.models.dark_matter import DarkMatter
 from src.models.dark_energy import QuintessenceField
 from src.models.spacetime import SpacetimeGeometry
-from src.utils.data_loader import load_h5_data
-from src.utils.plotting import plot_rotation_curve
+#from src.utils.data_loader import load_h5_data
+#from src.utils.plotting import plot_rotation_curve
 import numpy as np
 import scipy.integrate as integrate
 
@@ -61,6 +61,9 @@ def run_simulation(config_file):
             ddphi_dr2 = dm.field_equation((phi, dphi_dr), r, dilaton_field, graviphoton_field)
             # Placeholder for dark energy field equation (TODO: Implement)
             ddphi_de_dt2 = 0.0  
+            # Ensure that the derivatives are scalars
+            ddphi_dr2 = np.asscalar(ddphi_dr2)
+            ddphi_de_dt2 = np.asscalar(ddphi_de_dt2)
             return [dphi_dr, ddphi_dr2, dphi_de_dt, ddphi_de_dt2]
 
         # Solve the coupled field equations
