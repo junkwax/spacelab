@@ -15,6 +15,50 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+def einstein_field_equations(r, T_munu, spacetime):
+    """Solves the simplified Einstein field equations for a static,
+    spherically symmetric spacetime.
+
+    Args:
+        r (np.ndarray): Radial coordinate values.
+        T_munu (np.ndarray): Total stress-energy tensor.
+        spacetime (SpacetimeGeometry): The spacetime object.
+
+    Returns:
+        tuple: (A(r), B(r)) - the metric functions.
+    """
+    def equations(y, r, T_tt, T_rr, spacetime):
+        A, B, dA_dr, dB_dr = y
+
+        # Ensure A and B are not zero
+        A = np.maximum(A, 1e-6)
+        B = np.maximum(B, 1e-6)
+        mass_kg = spacetime.mass * spacetime.solar_mass_kg
+        rs = 2 * spacetime.G * mass_kg / (spacetime.c ** 2)
+
+        d2A_dr2 = (8 * np.pi * spacetime.G * T_tt / (spacetime.c**4)  + (1-A)/(r**2) + dA_dr/(r*A))*A**2
+        d2B_dr2 = B * ( dB_dr**2 / (2*B**2) + dB_dr/(r*B) + dA_dr*dB_dr/(2*A*B) - dA_dr/(r*A) + 8 * np.pi * spacetime.G * T_rr  / (spacetime.c**4) * A)
+
+        return [dA_dr, dB_dr, d2A_dr2, d2B_dr2]
+
+    # Extract T_tt and T_rr from the total stress-energy tensor
+    T_tt = T_munu[0, 0, :]
+    T_rr = T_munu[1, 1, :]
+
+    # Initial conditions for A(r) and B(r) (Schwarzschild)
+    mass_kg = spacetime.mass * spacetime.solar_mass_kg
+    rs = 2 * spacetime.G * mass_kg / (spacetime.c ** 2)
+    y0 = [1/(1-rs/r[0]), -(1-rs/r[0]), (rs/(r[0]**2))/(1-rs/r[0]), -rs/(r[0]**2)]
+
+
+    # Solve the equations
+    solution = integrate.odeint(equations, y0, r, args=(T_tt, T_rr, spacetime), rtol=1e-6, atol=1e-8)
+
+    # Extract A(r) and B(r)
+    A = solution[:, 0]
+    B = solution[:, 1]
+    return A, B
+
 def run_simulation(config_file):
     """Run a black hole simulation with dark matter and dark energy.
 
@@ -68,49 +112,7 @@ def run_simulation(config_file):
 
             return [dphi_DM_dr, ddphi_DM_dr2, dphi_DE_dr, ddphi_DE_dr2, ddphi_DE_dt2]
 
-        def einstein_field_equations(r, T_munu, spacetime):
-            """Solves the simplified Einstein field equations for a static,
-            spherically symmetric spacetime.
 
-            Args:
-                r (np.ndarray): Radial coordinate values.
-                T_munu (np.ndarray): Total stress-energy tensor.
-                spacetime (SpacetimeGeometry): The spacetime object
-
-            Returns:
-                tuple: (A(r), B(r)) - the metric functions.
-            """
-            def equations(y, r, T_tt, T_rr, spacetime):
-                A, B, dA_dr, dB_dr = y
-
-                # Ensure A and B are not zero
-                A = np.maximum(A, 1e-6)
-                B = np.maximum(B, 1e-6)
-                mass_kg = spacetime.mass * spacetime.solar_mass_kg
-                rs = 2 * spacetime.G * mass_kg / (spacetime.c ** 2)
-
-                d2A_dr2 = (8 * np.pi * spacetime.G * T_tt / (spacetime.c**4)  + (1-A)/(r**2) + dA_dr/(r*A))*A**2
-                d2B_dr2 = B * ( dB_dr**2 / (2*B**2) + dB_dr/(r*B) + dA_dr*dB_dr/(2*A*B) - dA_dr/(r*A) + 8 * np.pi * spacetime.G * T_rr  / (spacetime.c**4) * A)
-
-                return [dA_dr, dB_dr, d2A_dr2, d2B_dr2]
-
-            # Extract T_tt and T_rr from the total stress-energy tensor
-            T_tt = T_munu[0, 0, :]
-            T_rr = T_munu[1, 1, :]
-
-            # Initial conditions for A(r) and B(r) (Schwarzschild)
-            mass_kg = spacetime.mass * spacetime.solar_mass_kg
-            rs = 2 * spacetime.G * mass_kg / (spacetime.c ** 2)
-            y0 = [1/(1-rs/r_range[0]), -(1-rs/r_range[0]), (rs/(r_range[0]**2))/(1-rs/r_range[0]), -rs/(r_range[0]**2)]
-
-
-            # Solve the equations
-            solution = integrate.odeint(equations, y0, r, args=(T_tt, T_rr, spacetime), rtol=1e-6, atol=1e-8)
-
-            # Extract A(r) and B(r)
-            A = solution[:, 0]
-            B = solution[:, 1]
-            return A, B
 
         # --- Iterative Solution ---
         max_iterations = 10  # Set a maximum number of iterations
