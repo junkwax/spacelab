@@ -37,7 +37,7 @@ def test_simulation_workflow(tmp_path):
     # Write config to temporary file
     config_file = tmp_path / "test_config.yaml"
     with open(config_file, "w") as f:
-        yaml.safe_dump(config, f)  # Now has yaml imported
+        yaml.safe_dump(config, f)
     
     # Run simulation
     try:
