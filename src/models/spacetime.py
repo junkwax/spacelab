@@ -34,6 +34,7 @@ class SpacetimeGeometry:
         rs = 2 * self.G * mass_kg / (self.c**2)
 
         # Ensure radius is greater than Schwarzschild radius
+        r = np.asarray(r)  # Ensure r is a NumPy array
         if np.any(r <= rs):
             raise ValueError("Radius must be greater than the Schwarzschild radius.")
 
@@ -68,6 +69,7 @@ class SpacetimeGeometry:
         rs = 2 * self.G * mass_kg / (self.c**2)
 
         # Ensure radius is greater than Schwarzschild radius
+        r = np.asarray(r)  # Ensure r is a NumPy array
         if np.any(r <= rs):
             raise ValueError("Radius must be greater than the Schwarzschild radius.")
 
@@ -115,7 +117,7 @@ class SpacetimeGeometry:
         d2_dilaton_dr2 = np.gradient(d_dilaton_dr, r)
         d_graviphoton_dr = np.gradient(graviphoton_field, r)
         d2_graviphoton_dr2 = np.gradient(d_graviphoton_dr, r)
-        
+
         # Ricci scalar expression (derived from SymPy)
         R = (-graviphoton_field**2 * np.exp(dilaton_field/2)
              - 4.0 * graviphoton_field * np.exp(dilaton_field/2) * d_graviphoton_dr
@@ -125,3 +127,86 @@ class SpacetimeGeometry:
              - 4.0 * (r - rs) * np.exp(dilaton_field/2) * d2_dilaton_dr2
              - 8.0 * np.exp(dilaton_field/2) * d_dilaton_dr) / (4.0 * r * (r - rs))
         return R
+
+    def stress_energy_tensor_DM(self, r, phi_DM, dphi_DM_dr, phi_DE, dilaton_field, beta):
+        """Calculates the dark matter stress-energy tensor components."""
+
+        r = np.asarray(r)
+        phi_DM = np.asarray(phi_DM)
+        dphi_DM_dr = np.asarray(dphi_DM_dr)
+        phi_DE = np.asarray(phi_DE)
+        dilaton_field = np.asarray(dilaton_field)
+
+
+        # Calculate metric components (using Schwarzschild for now)
+        g_tt, g_rr, g_theta_theta, g_phi_phi = self.schwarzschild_metric(r)
+        g_inv = np.zeros((4, 4, len(r)))
+        g_inv[0, 0, :] = 1/g_tt
+        g_inv[1, 1, :] = 1/g_rr
+        g_inv[2, 2, :] = 1/g_theta_theta
+        g_inv[3, 3, :] = 1/g_phi_phi
+
+
+        C = 2 * np.pi * 1  # Assuming R_y = 1 for now
+
+        T_munu = np.zeros((4, 4, len(r)))
+
+        kinetic_term =  g_inv[0,0,:]*(0**2) + g_inv[1,1,:]*dphi_DM_dr**2 + g_inv[2,2,:]*(0**2) + g_inv[3,3,:]*(0**2)
+
+        for mu in range(4):
+          for nu in range(4):
+            if mu == nu:
+               if mu == 0:
+                   T_munu[mu, nu, :] = C * np.exp(dilaton_field/4) * (0 - (1/2)*g_tt*(np.exp(-dilaton_field/2) * kinetic_term + self.mass**2 * phi_DM**2 + 2*beta*phi_DE*phi_DM**2))
+               if mu == 1:
+                   T_munu[mu, nu, :] = C * np.exp(dilaton_field/4) * (dphi_DM_dr**2 - (1/2)*g_rr*(np.exp(-dilaton_field/2) * kinetic_term + self.mass**2 * phi_DM**2 + 2*beta*phi_DE*phi_DM**2))
+               if mu == 2:
+                   T_munu[mu, nu, :] = C * np.exp(dilaton_field/4) * (0 - (1/2)*g_theta_theta*(np.exp(-dilaton_field/2) * kinetic_term + self.mass**2 * phi_DM**2 + 2*beta*phi_DE*phi_DM**2))
+               if mu == 3:
+                   T_munu[mu, nu, :] = C * np.exp(dilaton_field/4) * (0 - (1/2)*g_phi_phi*(np.exp(-dilaton_field/2) * kinetic_term + self.mass**2 * phi_DM**2 + 2*beta*phi_DE*phi_DM**2))
+            else:
+                T_munu[mu, nu, :] = 0
+
+        return T_munu
+
+    def stress_energy_tensor_DE(self, r, phi_DE, dphi_DE_dr, dphi_DE_dt, phi_DM, dilaton_field, beta, V0, lambda_):
+        """Calculates the dark energy stress-energy tensor components."""
+
+        r = np.asarray(r)
+        dphi_DE_dt = np.asarray(dphi_DE_dt)
+        dphi_DE_dr = np.asarray(dphi_DE_dr)
+        phi_DE = np.asarray(phi_DE)
+        phi_DM = np.asarray(phi_DM)
+        dilaton_field = np.asarray(dilaton_field)
+
+
+        # Calculate metric components (using Schwarzschild for now)
+        g_tt, g_rr, g_theta_theta, g_phi_phi = self.schwarzschild_metric(r)
+        g_inv = np.zeros((4, 4, len(r)))
+        g_inv[0, 0, :] = 1/g_tt
+        g_inv[1, 1, :] = 1/g_rr
+        g_inv[2, 2, :] = 1/g_theta_theta
+        g_inv[3, 3, :] = 1/g_phi_phi
+
+        C = 2 * np.pi * 1  # Assuming R_y = 1 for now
+
+        T_munu = np.zeros((4, 4, len(r)))
+
+        kinetic_term =  g_inv[0,0,:]*dphi_DE_dt**2 + g_inv[1,1,:]*dphi_DE_dr**2 + g_inv[2,2,:]*(0**2) + g_inv[3,3,:]*(0**2)
+        potential_term = V0*np.exp(-lambda_*phi_DE)
+
+        for mu in range(4):
+            for nu in range(4):
+                if mu == nu:
+                    if mu == 0:
+                        T_munu[mu, nu, :] = C * np.exp(dilaton_field/4) * (dphi_DE_dt**2 - (1/2)*g_tt*(np.exp(-dilaton_field/2) * kinetic_term + 2*potential_term + 2*beta*phi_DE*phi_DM**2))
+                    if mu == 1:
+                        T_munu[mu, nu, :] = C * np.exp(dilaton_field/4) * (dphi_DE_dr**2 - (1/2)*g_rr*(np.exp(-dilaton_field/2) * kinetic_term + 2*potential_term + 2*beta*phi_DE*phi_DM**2))
+                    if mu == 2:
+                        T_munu[mu, nu, :] = C * np.exp(dilaton_field/4) * (0 - (1/2)*g_theta_theta*(np.exp(-dilaton_field/2) * kinetic_term + 2*potential_term + 2*beta*phi_DE*phi_DM**2))
+                    if mu == 3:
+                        T_munu[mu, nu, :] = C * np.exp(dilaton_field/4) * (0 - (1/2)*g_phi_phi*(np.exp(-dilaton_field/2) * kinetic_term + 2*potential_term + 2*beta*phi_DE*phi_DM**2))
+                else:
+                    T_munu[mu, nu, :] = 0
+
+        return T_munu
