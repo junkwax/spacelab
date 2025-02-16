@@ -37,7 +37,7 @@ class SpacetimeGeometry:
             raise ValueError("Radius must be greater than the Schwarzschild radius.")
 
         # Schwarzschild metric components
-        g_tt = -(1 - rs / r)
+        g_tt = -(1 - rs / r)  # Remove the extra 1 -
         g_rr = 1 / (1 - rs / r)
         g_theta_theta = r**2
         g_phi_phi = r**2 * np.sin(np.pi/2)**2  # Assume equatorial plane
