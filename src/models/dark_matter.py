@@ -59,7 +59,7 @@ class DarkMatter:
         R = 2.0 / r**2  # Placeholder for Ricci scalar
         return 0.5 * self.mass**2 * phi**2 + self.coupling_curvature * R * phi**2 + self.coupling_dilaton * dilaton_field * phi**2  # Include dilaton coupling
 
-    def field_equation(self, y: Tuple[Union[float, np.ndarray], Union[float, np.ndarray]], r: Union[float, np.ndarray], dilaton_field: Union[float, np.ndarray], graviphoton_field: Union[float, np.ndarray], phi_DE: Union[float, np.ndarray]) -> Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]:
+    def field_equation(self, y: Tuple[Union[float, np.ndarray], Union[float, np.ndarray]], r: Union[float, np.ndarray], dilaton_field: Union[float, np.ndarray], graviphoton_field: Union[float, np.ndarray], phi_DE: Union[float, np.ndarray]) -> Tuple[np.ndarray, np.ndarray]:
         """Scalar field equation.
 
         Args:
@@ -73,28 +73,30 @@ class DarkMatter:
             tuple: Tuple containing the first derivative (dphi_dr) and second derivative (ddphi_dr2) of the scalar field.
         """
         phi_DM, dphi_DM_dr = y
-        r = np.asarray(r)
+        r_arr = np.asarray(r)  # Use r_arr locally
         dilaton_field = np.asarray(dilaton_field)
         phi_DE = np.asarray(phi_DE)
 
         # Calculate derivatives of dilaton_field
-        d_dilaton_dr = np.gradient(dilaton_field, r)
+        d_dilaton_dr = np.gradient(dilaton_field, r_arr)
 
         # Convert mass from solar masses to kilograms and calculate rs
         mass_kg = self.mass * self.solar_mass_kg
         rs = 2 * self.G * mass_kg / (self.c**2)
 
         # Ensure radius is greater than Schwarzschild radius
-        if np.any(r <= rs):
+        if np.any(r_arr <= rs):
             raise ValueError("Radius must be greater than the Schwarzschild radius.")
 
         # Calculate ddphi_dr2 using the derived expression (bulk terms included)
-        ddphi_dr2 = (2.0 * r * phi_DM * self.coupling_dilaton * np.exp(dilaton_field / 4)
-                    + 1.0 * r * phi_DM * self.mass**2 * np.exp(dilaton_field / 4)
-                    + 2.0 * r * dphi_DM_dr * d_dilaton_dr
+        ddphi_dr2 = (2.0 * r_arr * phi_DM * self.coupling_dilaton * np.exp(dilaton_field / 4)
+                    + 1.0 * r_arr * phi_DM * self.mass**2 * np.exp(dilaton_field / 4)
+                    + 2.0 * r_arr * dphi_DM_dr * d_dilaton_dr
                     - 8.0 * phi_DM * self.coupling_dilaton * np.exp(dilaton_field / 4)
                     - 4.0 * phi_DM * self.mass**2 * np.exp(dilaton_field / 4)
                     - 4.0 * dphi_DM_dr * d_dilaton_dr
-                    - 8.0 * dphi_DM_dr / r) / (4.0 * (r - rs))
+                    - 8.0 * dphi_DM_dr / r_arr) / (4.0 * (r_arr - rs))
 
-        return (dphi_DM_dr, ddphi_dr2)
+
+        return (np.array([dphi_DM_dr]) if np.isscalar(r) else dphi_DM_dr,
+                np.array([ddphi_dr2]) if np.isscalar(r) else ddphi_dr2)
