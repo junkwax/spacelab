@@ -13,6 +13,7 @@ class SpacetimeGeometry:
         self.mass = mass  # mass in solar masses
         self.G = 6.67430e-11  # Gravitational constant [m^3 kg^-1 s^-2]
         self.c = 299792458  # Speed of light [m/s]
+        self.solar_mass_kg = 1.98847e30 # kg
 
     def schwarzschild_metric(
         self,
@@ -27,7 +28,7 @@ class SpacetimeGeometry:
             Tuple containing (g_tt, g_rr, g_theta_theta, g_phi_phi)
         """
         # Convert mass from solar masses to kilograms
-        mass_kg = self.mass * 1.98847e30  # 1 solar mass = 1.988e30 kg
+        mass_kg = self.mass * self.solar_mass_kg  # 1 solar mass = 1.988e30 kg
 
         # Calculate Schwarzschild radius in meters
         rs = 2 * self.G * mass_kg / (self.c**2)
@@ -37,7 +38,7 @@ class SpacetimeGeometry:
             raise ValueError("Radius must be greater than the Schwarzschild radius.")
 
         # Schwarzschild metric components
-        g_tt = -(1 - rs / r)  # Remove the extra 1 -
+        g_tt = -(1 - rs / r)
         g_rr = 1 / (1 - rs / r)
         g_theta_theta = r**2
         g_phi_phi = r**2 * np.sin(np.pi/2)**2  # Assume equatorial plane
@@ -61,7 +62,7 @@ class SpacetimeGeometry:
             Tuple containing (g_tt, g_rr, g_theta_theta, g_phi_phi, g_yy, g_ty)
         """
         # Convert mass from solar masses to kilograms
-        mass_kg = self.mass * 1.988e30  # 1 solar mass = 1.988e30 kg
+        mass_kg = self.mass * self.solar_mass_kg
 
         # Calculate Schwarzschild radius in meters
         rs = 2 * self.G * mass_kg / (self.c**2)
@@ -97,20 +98,30 @@ class SpacetimeGeometry:
             Ricci scalar [m^-2]
         """
         # Convert r to a NumPy array if it's a list
-        if isinstance(r, list):
-            r = np.array(r)
+        r = np.asarray(r)
+        dilaton_field = np.asarray(dilaton_field)
+        graviphoton_field = np.asarray(graviphoton_field)
 
-        # Calculate metric components
-        g_tt, g_rr, g_theta_theta, g_phi_phi, g_yy, g_ty = self.kaluza_klein_metric(r, dilaton_field, graviphoton_field)
+        # Convert mass from solar masses to kilograms and calculate rs
+        mass_kg = self.mass * self.solar_mass_kg
+        rs = 2 * self.G * mass_kg / (self.c**2)
 
-        # Calculate derivatives of metric components (assuming spherical symmetry and time independence)
-        d_g_tt_dr = np.gradient(g_tt, r)
-        d_g_rr_dr = np.gradient(g_rr, r)
-        #... (Calculate other derivatives as needed)
+        # Ensure radius is greater than Schwarzschild radius
+        if np.any(r <= rs):
+            raise ValueError("Radius must be greater than the Schwarzschild radius.")
 
-        # Calculate Ricci scalar (simplified for spherical symmetry and time independence)
-        R = (
-            -1 / (2 * g_rr**2) * (d_g_tt_dr / g_tt * d_g_rr_dr - 2 * d_g_tt_dr**2 / g_tt**2 + 2 * np.gradient(d_g_tt_dr, r) / g_tt)
-            #... (Add other terms based on the full Ricci scalar expression)
-        )
+        # Calculate derivatives using central differences
+        d_dilaton_dr = np.gradient(dilaton_field, r)
+        d2_dilaton_dr2 = np.gradient(d_dilaton_dr, r)
+        d_graviphoton_dr = np.gradient(graviphoton_field, r)
+        d2_graviphoton_dr2 = np.gradient(d_graviphoton_dr, r)
+        
+        # Ricci scalar expression (derived from SymPy)
+        R = (-graviphoton_field**2 * np.exp(dilaton_field/2)
+             - 4.0 * graviphoton_field * np.exp(dilaton_field/2) * d_graviphoton_dr
+             - 4.0 * np.exp(dilaton_field/2) * d2_graviphoton_dr2
+             + 1.0 * r * np.exp(dilaton_field/2) * d_graviphoton_dr**2
+             - 1.0 * (r - rs) * np.exp(dilaton_field/2) * d_dilaton_dr**2
+             - 4.0 * (r - rs) * np.exp(dilaton_field/2) * d2_dilaton_dr2
+             - 8.0 * np.exp(dilaton_field/2) * d_dilaton_dr) / (4.0 * r * (r - rs))
         return R
