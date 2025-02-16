@@ -26,3 +26,11 @@ def test_field_equation_with_placeholders(dark_matter):
     assert isinstance(ddphi_dr2, np.ndarray)
     assert dphi_dr.shape == r.shape
     assert ddphi_dr2.shape == r.shape
+
+    # Test with a scalar 'r' value
+    r_scalar = 3.0
+    dphi_dr_scalar, ddphi_dr2_scalar = dark_matter.field_equation((0.1, 0.01), r_scalar, 0.0, 0.0, 0.0)
+    assert isinstance(dphi_dr_scalar, np.ndarray)  # Should now be a NumPy array
+    assert isinstance(ddphi_dr2_scalar, np.ndarray)  # Should now be a NumPy array
+    assert dphi_dr_scalar.shape == (1,) # Check for correct shape
+    assert ddphi_dr2_scalar.shape == (1,)
