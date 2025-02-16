@@ -36,3 +36,15 @@ def test_field_equation_with_placeholders():
     assert ddphi_DE_dr2.shape == r.shape
     assert dphi_DE_dt.shape == r.shape
     assert ddphi_DE_dt2.shape == r.shape
+
+        # Test with a scalar 'r' value
+    r_scalar = 3.0
+    dphi_DE_dr_scalar, ddphi_DE_dr2_scalar, dphi_DE_dt_scalar, ddphi_DE_dt2_scalar = q.field_equation((0.0, 0.0, 0.0), r_scalar, 0.0, 0.1, 1e-10)
+    assert isinstance(dphi_DE_dr_scalar, np.ndarray)
+    assert isinstance(ddphi_DE_dr2_scalar, np.ndarray)
+    assert isinstance(dphi_DE_dt_scalar, np.ndarray)
+    assert isinstance(ddphi_DE_dt2_scalar, np.ndarray)
+    assert dphi_DE_dr_scalar.shape == (1,)  # Check for correct shape
+    assert ddphi_DE_dr2_scalar.shape == (1,)
+    assert dphi_DE_dt_scalar.shape == (1,)
+    assert ddphi_DE_dt2_scalar.shape == (1,)
