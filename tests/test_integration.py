@@ -1,6 +1,10 @@
+# tests/test_integration.py
+
 import pytest
 import yaml
-from src.simulation import run_simulation
+import numpy as np
+from src.simulation import run_simulation, einstein_field_equations  # Import einstein_field_equations
+from src.models.spacetime import SpacetimeGeometry
 
 def test_simulation_workflow(tmp_path):
     """Integration test for the full simulation workflow."""
@@ -40,3 +44,25 @@ def test_simulation_workflow(tmp_path):
         run_simulation(config_file)
     except Exception as e:
         pytest.fail(f"Simulation failed with error: {str(e)}")
+
+def test_einstein_field_equations_schwarzschild():
+    """Tests the Einstein field equation solver with a zero stress-energy tensor (Schwarzschild)."""
+    spacetime = SpacetimeGeometry(mass=1) # Solar Mass
+    r = np.linspace(3, 10, 100)
+    T_munu = np.zeros((4, 4, len(r)))  # Zero stress-energy tensor
+
+    A, B = einstein_field_equations(r, T_munu, spacetime)
+
+    assert isinstance(A, np.ndarray)
+    assert isinstance(B, np.ndarray)
+    assert A.shape == r.shape
+    assert B.shape == r.shape
+
+    # Check if the solution is close to Schwarzschild
+    mass_kg = spacetime.mass * spacetime.solar_mass_kg
+    rs = 2 * spacetime.G * mass_kg / (spacetime.c ** 2)
+    expected_A = 1 / (1 - rs / r)
+    expected_B = -(1 - rs / r)
+
+    assert np.allclose(A, expected_A, atol=1e-4)  # Relax tolerance
+    assert np.allclose(B, expected_B, atol=1e-4)
