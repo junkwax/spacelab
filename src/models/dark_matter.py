@@ -6,15 +6,18 @@ class DarkMatter:
 
     Args:
         mass (float): Mass of the dark matter particle in eV.
-        coupling_dilaton (float): Coupling constant to the dilaton field.
+        coupling_dilaton (float): Coupling constant to the dilaton field.  This is now 'beta'.
         coupling_curvature (float): Coupling constant to spacetime curvature.
     """
     def __init__(self, mass: float, coupling_dilaton: float, coupling_curvature: float):
         if mass <= 0 or coupling_dilaton <= 0 or coupling_curvature <= 0:
             raise ValueError("Mass and coupling constants must be positive.")
         self.mass = mass
-        self.coupling_dilaton = coupling_dilaton
+        self.coupling_dilaton = coupling_dilaton # This is now 'beta'
         self.coupling_curvature = coupling_curvature
+        self.solar_mass_kg = 1.98847e30
+        self.G = 6.67430e-11  # Gravitational constant [m^3 kg^-1 s^-2]
+        self.c = 299792458 # m/s
 
     @overload
     def density_profile(self, r: float, dilaton_field: float) -> float:...
@@ -56,7 +59,7 @@ class DarkMatter:
         R = 2.0 / r**2  # Placeholder for Ricci scalar
         return 0.5 * self.mass**2 * phi**2 + self.coupling_curvature * R * phi**2 + self.coupling_dilaton * dilaton_field * phi**2  # Include dilaton coupling
 
-    def field_equation(self, y: Tuple[Union[float, np.ndarray], Union[float, np.ndarray]], r: Union[float, np.ndarray], dilaton_field: Union[float, np.ndarray], graviphoton_field: Union[float, np.ndarray]) -> Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]:
+    def field_equation(self, y: Tuple[Union[float, np.ndarray], Union[float, np.ndarray]], r: Union[float, np.ndarray], dilaton_field: Union[float, np.ndarray], graviphoton_field: Union[float, np.ndarray], phi_DE: Union[float, np.ndarray]) -> Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]:
         """Scalar field equation.
 
         Args:
@@ -64,12 +67,34 @@ class DarkMatter:
             r (float or array-like): Radial distance from the black hole.
             dilaton_field (float or array-like): Value of the dilaton field at radius `r`.
             graviphoton_field (float or array-like): Value of the graviphoton field at radius `r`.
+            phi_DE (float or array-like): Value of the dark energy field at radius 'r'.
 
         Returns:
             tuple: Tuple containing the first derivative (dphi_dr) and second derivative (ddphi_dr2) of the scalar field.
         """
-        phi, dphi_dr = y
-        # TODO: Calculate second derivative, including bulk terms (Implement bulk terms)
-        ddphi_dr2 = -2.0 / r * dphi_dr - self.potential(phi, r, dilaton_field)  # Placeholder, needs bulk terms and metric function
-        # Ensure ddphi_dr2 is a NumPy array with a single element
-        return (dphi_dr, np.array([ddphi_dr2]))  # Return a tuple
+        phi_DM, dphi_DM_dr = y
+        r = np.asarray(r)
+        dilaton_field = np.asarray(dilaton_field)
+        phi_DE = np.asarray(phi_DE)
+
+        # Calculate derivatives of dilaton_field
+        d_dilaton_dr = np.gradient(dilaton_field, r)
+
+        # Convert mass from solar masses to kilograms and calculate rs
+        mass_kg = self.mass * self.solar_mass_kg
+        rs = 2 * self.G * mass_kg / (self.c**2)
+
+        # Ensure radius is greater than Schwarzschild radius
+        if np.any(r <= rs):
+            raise ValueError("Radius must be greater than the Schwarzschild radius.")
+
+        # Calculate ddphi_dr2 using the derived expression (bulk terms included)
+        ddphi_dr2 = (2.0 * r * phi_DM * self.coupling_dilaton * np.exp(dilaton_field / 4)
+                    + 1.0 * r * phi_DM * self.mass**2 * np.exp(dilaton_field / 4)
+                    + 2.0 * r * dphi_DM_dr * d_dilaton_dr
+                    - 8.0 * phi_DM * self.coupling_dilaton * np.exp(dilaton_field / 4)
+                    - 4.0 * phi_DM * self.mass**2 * np.exp(dilaton_field / 4)
+                    - 4.0 * dphi_DM_dr * d_dilaton_dr
+                    - 8.0 * dphi_DM_dr / r) / (4.0 * (r - rs))
+
+        return (dphi_DM_dr, ddphi_dr2)
