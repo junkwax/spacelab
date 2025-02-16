@@ -17,7 +17,6 @@ def test_schwarzschild_metric():
     assert np.isclose(g_theta_theta, r**2)
     assert np.isclose(g_phi_phi, r**2)
 
-
 def test_ricci_curvature():
     # Test that the Ricci curvature is calculated correctly.
     spacetime = SpacetimeGeometry(mass=10)
