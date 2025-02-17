@@ -1,20 +1,22 @@
+# src/models/dark_energy.py
 import numpy as np
-from typing import Union, overload
+from typing import Union, Tuple
 import logging
 
 logger = logging.getLogger(__name__)
 
 class QuintessenceField:
     """Model for dynamical dark energy (quintessence) with a scalar field."""
-    def __init__(self, V0: float, lambda_: float):
+    def __init__(self, V0: float, lambda_: float, mass: float = 1.0): # Added mass
         if V0 <= 0 or lambda_ <= 0:
             logger.error("Invalid quintessence parameters: V0=%s, lambda=%s", V0, lambda_)
             raise ValueError("V0 and lambda must be positive.")
         self.V0 = V0
         self.lambda_ = lambda_
-        self.solar_mass_kg = 1.98847e30  # Added
-        self.G = 6.67430e-11 # Added
-        self.c = 299792458 # Added
+        self.solar_mass_kg = 1.98847e30
+        self.G = 6.67430e-11
+        self.c = 299792458
+        self.mass = mass  # Initialize mass
 
 
     def potential(self, phi: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
@@ -41,38 +43,42 @@ class QuintessenceField:
         """Quintessence field equation."""
         phi_DE, dphi_DE_dr, dphi_DE_dt = y
 
-        r_arr = np.asarray(r)  # Use r_arr locally
+        r_arr = np.asarray(r)
         phi_dilaton = np.asarray(phi_dilaton)
         phi_DM = np.asarray(phi_DM)
-        # dphi_DE_dr = np.asarray(dphi_DE_dr) # NO LONGER NEEDED - Input can be scalar or array
-        # dphi_DE_dt = np.asarray(dphi_DE_dt)
+        phi_DE = np.asarray(phi_DE)
+        dphi_DE_dr = np.asarray(dphi_DE_dr)  # Input derivative is an array
+        dphi_DE_dt = np.asarray(dphi_DE_dt)  # Input derivative is an array
 
-
-        # Calculate derivatives
-        d_dilaton_dr = np.gradient(phi_dilaton, r_arr)
+        # Calculate derivatives of dilaton field
+        if r_arr.size <= 1:
+            d_dilaton_dr = np.array([0.0])
+        else:
+            d_dilaton_dr = np.gradient(phi_dilaton, r_arr)
 
         # Convert mass from solar masses to kilograms and calculate rs
-        mass_kg = self.mass * self.solar_mass_kg
+        mass_kg = self.mass * self.solar_mass_kg  # Use the field's mass
         rs = 2 * self.G * mass_kg / (self.c**2)
 
         # Ensure radius is greater than Schwarzschild radius
         if np.any(r_arr <= rs):
             raise ValueError("Radius must be greater than the Schwarzschild radius.")
 
-        # Calculate ddphi_dt2 and ddphi_dr2
+        # Calculate ddphi_dt2 and ddphi_dr2 *BEFORE* the conditional
         ddphi_dt2 = (1.0 * self.V0 * self.lambda_ * r_arr**2 * np.exp(phi_dilaton / 4) * np.exp(-self.lambda_ * phi_DE)
-                    + 1.0 * beta * r_arr**2 * phi_DM**2 * np.exp(phi_dilaton / 4)
-                    + 1.0 * dphi_DE_dt * d_dilaton_dr) / (r_arr * (r_arr - rs))
+                      + 1.0 * beta * r_arr**2 * phi_DM**2 * np.exp(phi_dilaton / 4)
+                      + 1.0 * dphi_DE_dt * d_dilaton_dr) / (r_arr * (r_arr - (2*self.G*mass_kg/(self.c**2))))
 
         ddphi_dr2 = (-2.0 * self.V0 * self.lambda_ * r_arr**2 * np.exp(phi_dilaton / 4) * np.exp(-self.lambda_ * phi_DE)
-                    - 2.0 * beta * r_arr**2 * phi_DM**2 * np.exp(phi_dilaton / 4)
-                    + 8.0 * self.V0 * self.lambda_ * r_arr * np.exp(phi_dilaton / 4) * np.exp(-self.lambda_ * phi_DE)
-                    + 8.0 * beta * r_arr * phi_DM**2 * np.exp(phi_dilaton / 4)
-                    + 1.0 * r_arr * dphi_DE_dr * d_dilaton_dr
-                    - 4.0 * dphi_DE_dr * d_dilaton_dr
-                    - 8.0 * dphi_DE_dr / r_arr) / (4.0 * (r_arr - rs))
+                      - 2.0 * beta * r_arr**2 * phi_DM**2 * np.exp(phi_dilaton / 4)
+                      + 8.0 * self.V0 * self.lambda_ * r_arr * np.exp(phi_dilaton / 4) * np.exp(-self.lambda_ * phi_DE)
+                      + 8.0 * beta * r_arr * phi_DM**2 * np.exp(phi_dilaton / 4)
+                      + 1.0 * r_arr * dphi_DE_dr * d_dilaton_dr
+                      - 4.0 * dphi_DE_dr * d_dilaton_dr
+                      - 8.0 * dphi_DE_dr / r_arr) / (4.0 * (r_arr - (2*self.G*mass_kg/(self.c**2))))
 
-        return (np.array([dphi_DE_dr]) if np.isscalar(r) else np.asarray(dphi_DE_dr),  # ALWAYS return NumPy array
-                np.array([ddphi_dr2]) if np.isscalar(r) else np.asarray(ddphi_DE_dr2),
-                np.array([dphi_DE_dt]) if np.isscalar(r) else np.asarray(dphi_DE_dt),
-                np.array([ddphi_dt2]) if np.isscalar(r) else np.asarray(ddphi_dt2))
+        print(f"Shape of r_arr: {r_arr.shape}") # Debugging print
+        print(f"Shape of ddphi_dr2: {ddphi_dr2.shape}") # Debugging print
+        print(f"Shape of ddphi_dt2: {ddphi_dt2.shape}") # Debugging print
+
+        return (dphi_DE_dr, ddphi_dr2, dphi_DE_dt, ddphi_dt2)  # Return calculated values
