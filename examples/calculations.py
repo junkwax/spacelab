@@ -1,3 +1,5 @@
+## Here's the SymPy code to perform the variations and derive the field equations:
+
 import sympy
 
 # Define coordinates
