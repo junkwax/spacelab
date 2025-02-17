@@ -1,3 +1,4 @@
+# tests/test_dark_matter.py (CORRECTED)
 import pytest
 import numpy as np
 from src.models.dark_matter import DarkMatter
@@ -24,7 +25,7 @@ def test_field_equation_with_placeholders(dark_matter):
     dphi_dr, ddphi_dr2 = dark_matter.field_equation(y, r, dilaton_field, graviphoton_field, phi_DE)
     assert isinstance(dphi_dr, np.ndarray)
     assert isinstance(ddphi_dr2, np.ndarray)
-    assert dphi_dr.shape == r.shape
+    assert dphi_dr.shape == r.shape #Corrected
     assert ddphi_dr2.shape == r.shape
 
     # Test with a scalar 'r' value
