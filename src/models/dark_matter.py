@@ -39,7 +39,7 @@ class DarkMatter:
         r_arr = np.asarray(r)  # Use r_arr locally
         dilaton_field = np.asarray(dilaton_field)
         phi_DE = np.asarray(phi_DE)
-        dphi_DM_dr = np.asarray(dphi_DM_dr) # Ensure this is an array!
+        # dphi_DM_dr = np.asarray(dphi_DM_dr)  # NO LONGER NEEDED - Input can be scalar or array
 
         # Calculate derivatives of dilaton_field
         d_dilaton_dr = np.gradient(dilaton_field, r_arr)
@@ -62,5 +62,5 @@ class DarkMatter:
                     - 8.0 * dphi_DM_dr / r_arr) / (4.0 * (r_arr - rs))
 
 
-        return (np.array([dphi_DM_dr]) if np.isscalar(r) else np.asarray(dphi_DM_dr),  # ALWAYS return NumPy array
-                np.array([ddphi_dr2]) if np.isscalar(r) else np.asarray(ddphi_dr2))
+        return (np.array([dphi_DM_dr]) if np.isscalar(r) else dphi_DM_dr,  # Return input dphi_DM_dr if scalar, calculated derivative if array
+                np.array([ddphi_dr2]) if np.isscalar(r) else ddphi_dr2) # Return calculated ddphi_dr2
