@@ -2,18 +2,12 @@ import numpy as np
 from typing import Union, overload, Tuple
 
 class DarkMatter:
-    """Model for axion-like dark matter in higher-dimensional spacetime.
-
-    Args:
-        mass (float): Mass of the dark matter particle in eV.
-        coupling_dilaton (float): Coupling constant to the dilaton field.  This is now 'beta'.
-        coupling_curvature (float): Coupling constant to spacetime curvature.
-    """
+    """Model for axion-like dark matter in higher-dimensional spacetime."""
     def __init__(self, mass: float, coupling_dilaton: float, coupling_curvature: float):
         if mass <= 0 or coupling_dilaton <= 0 or coupling_curvature <= 0:
             raise ValueError("Mass and coupling constants must be positive.")
         self.mass = mass
-        self.coupling_dilaton = coupling_dilaton # This is now 'beta'
+        self.coupling_dilaton = coupling_dilaton
         self.coupling_curvature = coupling_curvature
         self.solar_mass_kg = 1.98847e30
         self.G = 6.67430e-11  # Gravitational constant [m^3 kg^-1 s^-2]
@@ -26,56 +20,26 @@ class DarkMatter:
     def density_profile(self, r: np.ndarray, dilaton_field: np.ndarray) -> np.ndarray:...
 
     def density_profile(self, r: Union[float, np.ndarray], dilaton_field: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
-        """Compute the dark matter density profile.
-
-        Args:
-            r (float or array-like): Radial distance from the black hole.
-            dilaton_field (float or array-like): Value of the dilaton field at radius `r`.
-
-        Returns:
-            float or array-like: Density at radius `r`.
-
-        Raises:
-            ValueError: If `r` is non-positive.
-        """
+        """Compute the dark matter density profile."""
         r_arr = np.asarray(r)
         if np.any(r_arr <= 0):
             raise ValueError("Radius `r` must be positive.")
-        # TODO: Refine density profile based on theoretical model (higher-dimensional effects, dilaton coupling, etc.)
+        # TODO: Refine density profile
         return self.coupling_dilaton * np.exp(-self.mass * r_arr) * dilaton_field / r_arr**2  # Placeholder
 
     def potential(self, phi: Union[float, np.ndarray], r: Union[float, np.ndarray], dilaton_field: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
-        """Scalar field potential.
-
-        Args:
-            phi (float or array-like): Value of the scalar field.
-            r (float or array-like): Radial distance from the black hole.
-            dilaton_field (float or array-like): Value of the dilaton field at radius `r`.
-
-        Returns:
-            float or array-like: Potential at radius `r`.
-        """
-        # TODO: Calculate Ricci scalar based on the metric
-        R = 2.0 / r**2  # Placeholder for Ricci scalar
-        return 0.5 * self.mass**2 * phi**2 + self.coupling_curvature * R * phi**2 + self.coupling_dilaton * dilaton_field * phi**2  # Include dilaton coupling
+        """Scalar field potential."""
+        # TODO: Calculate Ricci scalar
+        R = 2.0 / r**2  # Placeholder
+        return 0.5 * self.mass**2 * phi**2 + self.coupling_curvature * R * phi**2 + self.coupling_dilaton * dilaton_field * phi**2
 
     def field_equation(self, y: Tuple[Union[float, np.ndarray], Union[float, np.ndarray]], r: Union[float, np.ndarray], dilaton_field: Union[float, np.ndarray], graviphoton_field: Union[float, np.ndarray], phi_DE: Union[float, np.ndarray]) -> Tuple[np.ndarray, np.ndarray]:
-        """Scalar field equation.
-
-        Args:
-            y (tuple): Tuple containing the scalar field value (phi) and its first derivative (dphi_dr).
-            r (float or array-like): Radial distance from the black hole.
-            dilaton_field (float or array-like): Value of the dilaton field at radius `r`.
-            graviphoton_field (float or array-like): Value of the graviphoton field at radius `r`.
-            phi_DE (float or array-like): Value of the dark energy field at radius 'r'.
-
-        Returns:
-            tuple: Tuple containing the first derivative (dphi_dr) and second derivative (ddphi_dr2) of the scalar field.
-        """
+        """Scalar field equation."""
         phi_DM, dphi_DM_dr = y
         r_arr = np.asarray(r)  # Use r_arr locally
         dilaton_field = np.asarray(dilaton_field)
         phi_DE = np.asarray(phi_DE)
+        dphi_DM_dr = np.asarray(dphi_DM_dr) # Ensure this is an array!
 
         # Calculate derivatives of dilaton_field
         d_dilaton_dr = np.gradient(dilaton_field, r_arr)
@@ -88,7 +52,7 @@ class DarkMatter:
         if np.any(r_arr <= rs):
             raise ValueError("Radius must be greater than the Schwarzschild radius.")
 
-        # Calculate ddphi_dr2 using the derived expression (bulk terms included)
+        # Calculate ddphi_dr2
         ddphi_dr2 = (2.0 * r_arr * phi_DM * self.coupling_dilaton * np.exp(dilaton_field / 4)
                     + 1.0 * r_arr * phi_DM * self.mass**2 * np.exp(dilaton_field / 4)
                     + 2.0 * r_arr * dphi_DM_dr * d_dilaton_dr
@@ -98,5 +62,5 @@ class DarkMatter:
                     - 8.0 * dphi_DM_dr / r_arr) / (4.0 * (r_arr - rs))
 
 
-        return (np.array([dphi_DM_dr]) if np.isscalar(r) else dphi_DM_dr,
-                np.array([ddphi_dr2]) if np.isscalar(r) else ddphi_dr2)
+        return (np.array([dphi_DM_dr]) if np.isscalar(r) else np.asarray(dphi_DM_dr),  # ALWAYS return NumPy array
+                np.array([ddphi_dr2]) if np.isscalar(r) else np.asarray(ddphi_dr2))
