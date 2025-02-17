@@ -43,8 +43,10 @@ class SpacetimeGeometry:
         g_rr = 1 / (1 - rs / r)
         g_theta_theta = r**2
         g_phi_phi = r**2 * np.sin(np.pi/2)**2  # Assume equatorial plane
-
-        return (g_tt, g_rr, g_theta_theta, g_phi_phi)
+        if np.isscalar(r):
+            return (g_tt.item(), g_rr.item(), g_theta_theta.item(), g_phi_phi.item())
+        else:
+            return (g_tt, g_rr, g_theta_theta, g_phi_phi)
 
     def kaluza_klein_metric(
         self,
@@ -72,6 +74,8 @@ class SpacetimeGeometry:
         r = np.asarray(r)  # Ensure r is a NumPy array
         if np.any(r <= rs):
             raise ValueError("Radius must be greater than the Schwarzschild radius.")
+        dilaton_field = np.asarray(dilaton_field) #Ensure dilaton is array
+        graviphoton_field = np.asarray(graviphoton_field) #Ensure graviphoton is array
 
         # Kaluza-Klein metric components
         g_tt = -(1 - rs / r) * np.exp(-dilaton_field / 2)
@@ -80,8 +84,12 @@ class SpacetimeGeometry:
         g_phi_phi = r**2 * np.sin(np.pi/2)**2 * np.exp(-dilaton_field / 2)  # Assume equatorial plane
         g_yy = np.exp(dilaton_field)
         g_ty = graviphoton_field
+        
+        if r.ndim == 0:
+            return (g_tt.item(), g_rr.item(), g_theta_theta.item(), g_phi_phi.item(), g_yy.item(), g_ty.item())
+        else:
+            return (g_tt, g_rr, g_theta_theta, g_phi_phi, g_yy, g_ty)
 
-        return (g_tt, g_rr, g_theta_theta, g_phi_phi, g_yy, g_ty)
 
     def ricci_curvature(
         self,
@@ -113,10 +121,17 @@ class SpacetimeGeometry:
             raise ValueError("Radius must be greater than the Schwarzschild radius.")
 
         # Calculate derivatives using central differences
-        d_dilaton_dr = np.gradient(dilaton_field, r)
-        d2_dilaton_dr2 = np.gradient(d_dilaton_dr, r)
-        d_graviphoton_dr = np.gradient(graviphoton_field, r)
-        d2_graviphoton_dr2 = np.gradient(d_graviphoton_dr, r)
+        # Handle scalar case for r
+        if r.size == 1:
+            d_dilaton_dr = np.array([0.0])  # No change if only one point
+            d2_dilaton_dr2 = np.array([0.0])
+            d_graviphoton_dr = np.array([0.0])
+            d2_graviphoton_dr2 = np.array([0.0])
+        else:
+            d_dilaton_dr = np.gradient(dilaton_field, r)
+            d2_dilaton_dr2 = np.gradient(d_dilaton_dr, r)
+            d_graviphoton_dr = np.gradient(graviphoton_field, r)
+            d2_graviphoton_dr2 = np.gradient(d_graviphoton_dr, r)
 
         # Ricci scalar expression (derived from SymPy)
         R = (-graviphoton_field**2 * np.exp(dilaton_field/2)
