@@ -1,0 +1,12 @@
+# SpaceLab SPARC Galaxy Properties Catalog
+# Based on Lelli, McGaugh & Schombert (2016), AJ 152, 157
+#
+# Columns:
+#   Name         Morph     Dist(Mpc)  Inc(deg)  L36(1e9_Lsun)  Reff(kpc)  SBeff(Lsun/pc2)  Vflat(km/s)  Q  M_HI(1e9_Msun)  R_disk(kpc)
+#   Q = quality flag: 1=best, 2=good, 3=marginal
+#
+NGC2403     SABcd     3.18     62.9     2.67     2.07     48.3    128.0    1    1.80    1.73
+NGC3198     SBc      13.80     71.5     8.52     3.85     47.2    150.0    1    5.30    3.22
+NGC6503     SAcd      5.27     74.0     2.15     1.43     82.5    118.0    1    0.56    1.19
+NGC7814     SAab     14.40     90.0    18.50     2.10    310.0    225.0    1    0.82    1.75
+DDO154      IBm       3.70     66.0     0.007    0.52     0.2     52.0    1    0.25    0.43

@@ -1,9 +1,11 @@
-numpy==1.26.0
-scipy==1.11.3
-emcee==3.1.4
-h5py==3.9.0
-matplotlib==3.8.0
-pyyaml==6.0.1
-mpi4py==3.1.5
-petsc4py==3.20.0
-pydantic==2.4.2
+# Core
+numpy>=1.24.0
+scipy>=1.10.0
+matplotlib>=3.7.0
+PyYAML>=6.0
+
+# Testing
+pytest>=7.3.0
+
+# Optional: MCMC (built-in fallback provided if missing)
+emcee>=3.1.0

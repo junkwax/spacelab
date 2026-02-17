@@ -1,0 +1,23 @@
+black_hole:
+  mass: 1.0e+06
+  spin: 0.7
+
+spacetime:
+  black_hole_mass: 1.0e+06
+
+dark_matter:
+  mass: 1.0e-22
+  coupling_dilaton: 1.0e-10
+  coupling_curvature: 1.0e-05
+
+dark_energy:
+  V0: 1.0e-47
+  lambda_: 0.1
+
+fields:
+  dilaton: 1.0
+  graviphoton: 0.0
+
+numerical:
+  grid_size: 64
+  time_steps: 500

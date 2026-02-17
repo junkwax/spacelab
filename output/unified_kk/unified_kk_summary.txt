@@ -1,0 +1,58 @@
+=================================================================
+SpaceLab — Unified Kaluza-Klein Parameters
+=================================================================
+
+FUNDAMENTAL:
+  R5 (compactification radius)  = 1.0000e-06 m
+  M5 (5D Planck mass)           = 1.0000e+29 eV
+  m_KK (KK scale)               = 1.9733e-01 eV
+  M_Pl_4D (derived)             = 1.7844e+44 eV
+
+DILATON:
+  m_dilaton                     = 1.9733e-02 eV
+  g_dilaton_matter              = 4.5757e-45 eV⁻¹
+  dilaton_vev                   = -15.4384
+
+AXION (Dark Matter):
+  m_axion                       = 7.0381e-22 eV
+  f_axion (decay constant)      = 2.8400e+43 eV
+  g_axion_dilaton               = 1.2995e-01
+  instanton_suppression         = 2.6349e+47
+  instanton_action S            = -109.19
+
+GRAVIPHOTON:
+  g_graviphoton                 = 5.6041e-45 eV⁻¹
+
+QUINTESSENCE (Dark Energy):
+  V0                            = 2.7984e-11 eV⁴
+  lambda                        = 0.8165
+=================================================================
+
+ROTATION CURVE FIT RESULTS (Universal KK Parameters)
+=================================================================
+Galaxy        N_pts         χ²       χ²_r
+-----------------------------------------------------------------
+DDO154           21    1234.45     61.722
+NGC2403          27     788.59     30.330
+NGC3198          26    1257.70     50.308
+NGC6503          25     513.18     21.382
+NGC7814          21     175.18      8.759
+-----------------------------------------------------------------
+TOTAL           120    3969.10     33.924
+
+Total DOF = 117
+p-value note: χ²_r ~ 1 indicates a good fit,
+              χ²_r >> 1 indicates the model is rejected,
+              χ²_r << 1 indicates overfitting or overestimated errors.
+
+
+KEY PREDICTION:
+  The compactification radius R5 = 1.0000e-06 m
+  predicts an axion mass m_a = 7.0381e-22 eV
+  and a dilaton mass m_d = 1.9733e-02 eV
+
+  This can be tested independently via:
+    - Black hole superradiance constraints on m_a
+    - Lyman-α forest constraints on fuzzy DM mass
+    - EHT shadow measurements (dilaton charge → modified ISCO)
+    - LISA gravitational wave phase shifts (scalar dipole radiation)

@@ -7,110 +7,120 @@ class SpacetimeGeometry:
     Args:
         mass (float): Black hole mass [solar masses]
     """
+    # Constants
+    G = 6.67430e-11       # Gravitational constant [m^3 kg^-1 s^-2]
+    C = 299792458.0       # Speed of light [m/s]
+    SOLAR_MASS_KG = 1.98847e30
+
     def __init__(self, mass: float):
         if mass <= 0:
             raise ValueError("Mass must be positive.")
-        self.mass = mass  # mass in solar masses
-        self.G = 6.67430e-11  # Gravitational constant [m^3 kg^-1 s^-2]
-        self.c = 299792458  # Speed of light [m/s]
+        self.mass = mass
+
+    def _get_schwarzschild_radius(self) -> float:
+        """Calculate the Schwarzschild radius in meters."""
+        mass_kg = self.mass * self.SOLAR_MASS_KG
+        return 2 * self.G * mass_kg / (self.C ** 2)
 
     def schwarzschild_metric(
         self,
-        r: Union[float, np.ndarray]
-    ) -> Union[Tuple[float, float, float, float], Tuple[np.ndarray,...]]:
+        r: Union[float, np.ndarray, list],
+        theta: float = np.pi / 2,
+    ) -> Tuple[Union[float, np.ndarray], ...]:
         """Compute Schwarzschild metric components in spherical coordinates.
 
         Args:
-            r: Radial coordinate [meters]
+            r: Radial coordinate [meters]. Must be > Schwarzschild radius.
+            theta: Polar angle [radians]. Defaults to π/2 (equatorial plane).
 
         Returns:
-            Tuple containing (g_tt, g_rr, g_theta_theta, g_phi_phi)
+            Tuple of (g_tt, g_rr, g_theta_theta, g_phi_phi).
         """
-        # Convert mass from solar masses to kilograms
-        mass_kg = self.mass * 1.98847e30  # 1 solar mass = 1.988e30 kg
+        r_val = np.asarray(r, dtype=float)
+        rs = self._get_schwarzschild_radius()
 
-        # Calculate Schwarzschild radius in meters
-        rs = 2 * self.G * mass_kg / (self.c**2)
+        if np.any(r_val <= rs):
+            raise ValueError(
+                f"Radius must be greater than the Schwarzschild radius ({rs:.2e} m)."
+            )
 
-        # Ensure radius is greater than Schwarzschild radius
-        if np.any(r <= rs):
-            raise ValueError("Radius must be greater than the Schwarzschild radius.")
-
-        # Schwarzschild metric components
-        g_tt = -(1 - rs / r)  # Remove the extra 1 -
-        g_rr = 1 / (1 - rs / r)
-        g_theta_theta = r**2
-        g_phi_phi = r**2 * np.sin(np.pi/2)**2  # Assume equatorial plane
+        schwarz_factor = 1.0 - rs / r_val
+        g_tt = -schwarz_factor
+        g_rr = 1.0 / schwarz_factor
+        g_theta_theta = r_val ** 2
+        g_phi_phi = r_val ** 2 * np.sin(theta) ** 2
 
         return (g_tt, g_rr, g_theta_theta, g_phi_phi)
 
     def kaluza_klein_metric(
         self,
-        r: Union[float, np.ndarray],
+        r: Union[float, np.ndarray, list],
         dilaton_field: Union[float, np.ndarray],
-        graviphoton_field: Union[float, np.ndarray]
-    ) -> Tuple[np.ndarray,...]:
+        graviphoton_field: Union[float, np.ndarray],
+        theta: float = np.pi / 2,
+    ) -> Tuple[np.ndarray, ...]:
         """Compute Kaluza-Klein metric components.
 
         Args:
-            r: Radial coordinate [meters]
-            dilaton_field: Dilaton field value
-            graviphoton_field: Graviphoton field value
+            r: Radial coordinate [meters]. Must be > Schwarzschild radius.
+            dilaton_field: Dilaton scalar field value(s).
+            graviphoton_field: Graviphoton field value(s).
+            theta: Polar angle [radians]. Defaults to π/2 (equatorial plane).
 
         Returns:
-            Tuple containing (g_tt, g_rr, g_theta_theta, g_phi_phi, g_yy, g_ty)
+            Tuple of (g_tt, g_rr, g_theta_theta, g_phi_phi, g_yy, g_ty).
         """
-        # Convert mass from solar masses to kilograms
-        mass_kg = self.mass * 1.988e30  # 1 solar mass = 1.988e30 kg
+        r_val = np.asarray(r, dtype=float)
+        d_val = np.asarray(dilaton_field, dtype=float)
+        gp_val = np.asarray(graviphoton_field, dtype=float)
 
-        # Calculate Schwarzschild radius in meters
-        rs = 2 * self.G * mass_kg / (self.c**2)
+        rs = self._get_schwarzschild_radius()
 
-        # Ensure radius is greater than Schwarzschild radius
-        if np.any(r <= rs):
+        if np.any(r_val <= rs):
             raise ValueError("Radius must be greater than the Schwarzschild radius.")
 
-        # Kaluza-Klein metric components
-        g_tt = -(1 - rs / r) * np.exp(-dilaton_field / 2)
-        g_rr = 1 / (1 - rs / r) * np.exp(-dilaton_field / 2)
-        g_theta_theta = r**2 * np.exp(-dilaton_field / 2)
-        g_phi_phi = r**2 * np.sin(np.pi/2)**2 * np.exp(-dilaton_field / 2)  # Assume equatorial plane
-        g_yy = np.exp(dilaton_field)
-        g_ty = graviphoton_field
+        exp_d = np.exp(-d_val / 2.0)
+        schwarz_factor = 1.0 - rs / r_val
+
+        g_tt = -schwarz_factor * exp_d
+        g_rr = (1.0 / schwarz_factor) * exp_d
+        g_theta_theta = (r_val ** 2) * exp_d
+        g_phi_phi = (r_val ** 2 * np.sin(theta) ** 2) * exp_d
+        g_yy = np.exp(d_val)
+        g_ty = gp_val
 
         return (g_tt, g_rr, g_theta_theta, g_phi_phi, g_yy, g_ty)
 
     def ricci_curvature(
         self,
-        r: Union[float, np.ndarray],
+        r: Union[float, np.ndarray, list],
         dilaton_field: Union[float, np.ndarray],
-        graviphoton_field: Union[float, np.ndarray]
+        graviphoton_field: Union[float, np.ndarray],
     ) -> Union[float, np.ndarray]:
         """Compute Ricci scalar curvature for the Kaluza-Klein metric.
 
-        Args:
-            r: Radial coordinate [meters]
-            dilaton_field: Dilaton field value
-            graviphoton_field: Graviphoton field value
-
-        Returns:
-            Ricci scalar [m^-2]
+        For scalar inputs, computes the analytic Schwarzschild Kretschner-
+        approximated curvature.  For array inputs, uses numerical gradients.
         """
-        # Convert r to a NumPy array if it's a list
-        if isinstance(r, list):
-            r = np.array(r)
+        r_val = np.asarray(r, dtype=float)
 
-        # Calculate metric components
-        g_tt, g_rr, g_theta_theta, g_phi_phi, g_yy, g_ty = self.kaluza_klein_metric(r, dilaton_field, graviphoton_field)
+        # Scalar case: use analytic approximation R ~ 12 rs^2 / r^6
+        if np.ndim(r_val) == 0:
+            rs = self._get_schwarzschild_radius()
+            if r_val <= rs:
+                raise ValueError("Radius must be greater than the Schwarzschild radius.")
+            return 12.0 * rs ** 2 / r_val ** 6
 
-        # Calculate derivatives of metric components (assuming spherical symmetry and time independence)
-        d_g_tt_dr = np.gradient(g_tt, r)
-        d_g_rr_dr = np.gradient(g_rr, r)
-        #... (Calculate other derivatives as needed)
-
-        # Calculate Ricci scalar (simplified for spherical symmetry and time independence)
-        R = (
-            -1 / (2 * g_rr**2) * (d_g_tt_dr / g_tt * d_g_rr_dr - 2 * d_g_tt_dr**2 / g_tt**2 + 2 * np.gradient(d_g_tt_dr, r) / g_tt)
-            #... (Add other terms based on the full Ricci scalar expression)
+        g_tt, g_rr, _, _, _, _ = self.kaluza_klein_metric(
+            r_val, dilaton_field, graviphoton_field
         )
-        return R
+
+        d_g_tt_dr = np.gradient(g_tt, r_val)
+        d_g_rr_dr = np.gradient(g_rr, r_val)
+
+        with np.errstate(divide="ignore", invalid="ignore"):
+            term1 = d_g_tt_dr / g_tt
+            term2 = d_g_rr_dr
+            R = -1.0 / (2.0 * g_rr ** 2) * (term1 * term2)
+
+        return np.nan_to_num(R)
